@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 rustsbi = { version = "0.4.0", features = ["machine"] }
+riscv = "0.12.1"
 # sbi-rt = { version = "0.0.3", features = ["legacy"] }

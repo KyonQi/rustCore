@@ -6,7 +6,7 @@ mod console;
 
 use core::arch::global_asm;
 
-use sbi::console_putchar;
+use sbi::{console_putchar, sleep};
 global_asm!(include_str!("entry.asm"));
 
 // SAFETY: there is no other global function of this name
@@ -15,6 +15,7 @@ pub fn rust_main() -> ! {
     clear_bss();
     console_putchar('o' as usize);
     console_putchar('k' as usize);
+    sleep(5);
     println!("Hello, World");
     panic!("Shutdown right now!");
     // loop {
