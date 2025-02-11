@@ -45,8 +45,8 @@ pub fn sleep(t: usize) {
     let wake_up_time = current_time + t * CLOCK_FREQ;
     // SAFETY: allow the timer interrupt by riscv lib
     unsafe { set_stimer(); }
-    let ret = sbi_call(SBI_SET_TIMER, 0, wake_up_time, 0, 0); // set the timer
-    println!("{}", ret);
+    sbi_call(SBI_SET_TIMER, 0, wake_up_time, 0, 0); // set the timer
+    // println!("{}", ret);
     // SAFETY: wait for timer interrupt
     unsafe { asm!("wfi"); }
 }
