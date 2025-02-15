@@ -1,16 +1,8 @@
-use log::{Level, LevelFilter, Log};
+use log::{Level, LevelFilter};
 
 use crate::println;
 
 struct Logger;
-
-// enum LEVEL {
-//     ERROR,
-//     WARN,
-//     INFO,
-//     DEBUG,
-//     TRACE,
-// }
 
 pub fn init() {
     static LOGGER: Logger = Logger;
