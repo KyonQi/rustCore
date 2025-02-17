@@ -3,6 +3,7 @@
 use core::arch::asm;
 
 use lazy_static::lazy_static;
+use log::debug;
 
 use crate::trap::TrapContext;
 use crate::{println, sbi::shutdown};
@@ -14,7 +15,7 @@ const APP_SIZE_LIMIT: usize = 0x20000;
 const MAX_APP_NUM: usize = 16;
 
 const KERNEL_STACK_SIZE: usize = 4096 * 2; // 8KB for kernel stack
-const USER_STACK_SIZE: usize = 4096 * 2; // 8KB for user stack
+const USER_STACK_SIZE: usize = 4096; // 8KB for user stack
 
 /// It's used to show the total apps and the current app the OS is going to run
 struct AppManager {
@@ -161,4 +162,16 @@ pub fn run_next_app() -> ! {
             USER_STACK.get_sp())) as *const _ as usize);
     }
     panic!("Unreachable in batch::run_current_app!");
+}
+
+// for experiment 2
+pub fn get_current_app_addr() -> [usize; 2] {
+    let app_manager = APP_MANAGER.exclusive_access();
+    let len = app_manager.app_start[app_manager.get_current_app()] - app_manager.app_start[app_manager.get_current_app() - 1];
+    drop(app_manager);
+    [APP_BASE_ADDRESS, APP_BASE_ADDRESS + len]
+}
+
+pub fn get_user_stack_range() -> [usize; 2] {
+    [USER_STACK.get_sp() - USER_STACK_SIZE, USER_STACK.get_sp()]
 }
