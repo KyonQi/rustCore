@@ -7,7 +7,7 @@ BOOTLOADER = ../bootloader/rustsbi-qemu.bin
 
 ADDR = 0x80200000
 
-LOG ?= INFO
+export LOG ?= DEBUG
 
 .PHONY: all build objcopy run clean
 

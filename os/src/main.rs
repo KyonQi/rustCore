@@ -4,12 +4,19 @@ mod lang_items;
 mod sbi;
 mod console;
 mod log;
+mod batch;
+mod sync;
+mod trap;
+mod syscall;
 
 use core::arch::global_asm;
 
 use ::log::{debug, error, info, trace, warn};
 use sbi::{console_putchar, sleep};
+
 global_asm!(include_str!("entry.asm"));
+global_asm!(include_str!("link_app.S"));
+
 
 // SAFETY: there is no other global function of this name
 #[unsafe(no_mangle)]
@@ -42,9 +49,12 @@ pub fn rust_main() -> ! {
     // debug!("test debug");
     // trace!("test trace");
     
-    sleep(5);
+    // sleep(2);
     println!("Hello, World");
-    panic!("Shutdown right now!");
+    // panic!("Shutdown right now!");
+    trap::init();
+    batch::init();
+    batch::run_next_app();
 }
 
 // need to set 0 for .bss section
