@@ -4,7 +4,9 @@ mod lang_items;
 mod sbi;
 mod console;
 mod log;
-mod batch;
+// mod batch;
+mod loader;
+mod config;
 mod sync;
 mod trap;
 mod syscall;
@@ -53,8 +55,8 @@ pub fn rust_main() -> ! {
     println!("Hello, World");
     // panic!("Shutdown right now!");
     trap::init();
-    batch::init();
-    batch::run_next_app();
+    // batch::init();
+    // batch::run_next_app();
 }
 
 // need to set 0 for .bss section
