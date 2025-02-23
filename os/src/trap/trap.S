@@ -40,7 +40,7 @@ __alltraps:
 __restore:
     # case 1: start app by __restore
     # case 2: back to U mode after handling trap
-    mv sp, a0
+    # mv sp, a0
     # note that __restore(cx_addr: usize), a0 stores the cx_addr
     # so now, sp->kernel stack, sscratch->user stack
     # restore sstatus, sepc

@@ -1,7 +1,7 @@
 #![no_std]
 #![feature(linkage)]
 
-use syscall::{sys_exit, sys_write};
+use syscall::{sys_exit, sys_write, sys_yield};
 
 mod syscall;
 pub mod console;
@@ -38,4 +38,8 @@ pub fn write(fd: usize, buffer: &[u8]) -> isize {
 
 pub fn exit(exit_code: i32) -> isize {
     sys_exit(exit_code)
+}
+
+pub fn yield_() -> isize {
+    sys_yield()
 }
