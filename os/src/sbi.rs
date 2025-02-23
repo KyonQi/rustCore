@@ -51,6 +51,10 @@ pub fn sleep(t: usize) {
     unsafe { asm!("wfi"); }
 }
 
+pub fn set_timer(timer: usize) {
+    sbi_rt::set_timer(timer as _);
+}
+
 pub fn shutdown(failure: bool) -> !{
     if !failure {
         // shutdown with no reason

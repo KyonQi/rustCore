@@ -1,7 +1,7 @@
 #![no_std]
 #![feature(linkage)]
 
-use syscall::{sys_exit, sys_write, sys_yield};
+use syscall::{sys_exit, sys_get_time, sys_write, sys_yield};
 
 mod syscall;
 pub mod console;
@@ -42,4 +42,8 @@ pub fn exit(exit_code: i32) -> isize {
 
 pub fn yield_() -> isize {
     sys_yield()
+}
+
+pub fn get_time() -> isize {
+    sys_get_time()
 }
