@@ -56,6 +56,9 @@ pub fn rust_main() -> ! {
     println!("Hello, World");
     // panic!("Shutdown right now!");
     trap::init();
+    loader::load_apps();
+    task::run_first_task();
+    panic!("Unreachable in rust_main!");
     // batch::init();
     // batch::run_next_app();
 }
