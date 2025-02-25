@@ -1,5 +1,8 @@
 #![no_std]
 #![no_main]
+#![feature(alloc_error_handler)]
+extern crate alloc;
+
 mod lang_items;
 mod sbi;
 mod console;
@@ -12,6 +15,7 @@ mod trap;
 mod syscall;
 mod task;
 mod timer;
+mod mm;
 
 use core::arch::global_asm;
 
