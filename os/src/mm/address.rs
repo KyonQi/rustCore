@@ -190,7 +190,7 @@ impl PhysPageNum {
     }
 
     /// get the content of this physcial page in a &mut [u8] way (4096 in total)
-    pub fn get_bytes_array(&self) -> &'static [u8] {
+    pub fn get_bytes_array(&self) -> &'static mut [u8] {
         let pa: PhysAddr = (*self).into();
         unsafe {
             core::slice::from_raw_parts_mut(pa.0 as *mut u8, 4096)

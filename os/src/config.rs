@@ -9,3 +9,5 @@ pub const CLOCK_FREQ: usize = 12500000;
 
 pub const PAGE_SIZE: usize = 0x1000; // 4KB as page size
 pub const PAGE_SIZE_BITS: usize = 0xc; // 4KB -> 12 bits to represent
+
+pub const MEMORY_END: usize = 0x8800_0000;
