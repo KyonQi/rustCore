@@ -1,4 +1,6 @@
-mod heap_allocator;
+pub mod heap_allocator;
+mod address;
+mod page_table;
 
 pub fn init() {
 

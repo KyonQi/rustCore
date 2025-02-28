@@ -20,6 +20,7 @@ mod mm;
 use core::arch::global_asm;
 
 use ::log::{debug, error, info, trace, warn};
+use mm::heap_allocator::{heap_test, init_heap};
 use sbi::{console_putchar, sleep};
 
 global_asm!(include_str!("entry.asm"));
@@ -59,12 +60,17 @@ pub fn rust_main() -> ! {
     
     // sleep(2);
     println!("Hello, World");
+    init_heap();
+    heap_test();
     // panic!("Shutdown right now!");
+
     trap::init();
     loader::load_apps();
     trap::enable_timer_interrupt();
     timer::set_next_trigger();
     task::run_first_task();
+
+
     panic!("Unreachable in rust_main!");
     // batch::init();
     // batch::run_next_app();
