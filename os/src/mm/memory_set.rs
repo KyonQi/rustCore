@@ -22,14 +22,14 @@ unsafe extern "C" {
     fn strampoline();
 }
 
-// lazy_static! {
-//     pub static ref KERNEL_SPACE: Arc<UPSafeCell<MemorySet>> = 
-//         Arc::new(unsafe {
-//             UPSafeCell::new(
-//                 MemorySet
-//             )
-//         });
-// }
+lazy_static! {
+    pub static ref KERNEL_SPACE: Arc<UPSafeCell<MemorySet>> = 
+        Arc::new(unsafe {
+            UPSafeCell::new(
+                MemorySet::new_kernel()
+            )
+        });
+}
 
 
 /// memory set is a structure which contains virtual-memory space
