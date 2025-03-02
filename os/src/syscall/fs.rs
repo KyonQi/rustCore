@@ -1,6 +1,6 @@
 use log::{debug, info};
 
-use crate::{print, syscall::process::sys_exit};
+use crate::{mm::translated_byte_buffer, print, syscall::process::sys_exit, task::current_user_token};
 
 const FD_OUT: usize = 1; // to the terminal
 
@@ -22,11 +22,16 @@ pub fn sys_write(fd: usize, buf: *const u8, len: usize) -> isize {
     // }
     match fd {
         FD_OUT => {
-            let slice = unsafe {
-                core::slice::from_raw_parts(buf, len)
-            };
-            let str = core::str::from_utf8(slice).unwrap();
-            print!("{}", str);
+            // let slice = unsafe {
+            //     core::slice::from_raw_parts(buf, len)
+            // };
+            // let str = core::str::from_utf8(slice).unwrap();
+            // print!("{}", str);
+            // len as isize
+            let buffers = translated_byte_buffer(current_user_token(), buf, len);
+            for buffer in buffers {
+                print!("{}", core::str::from_utf8(buffer).unwrap());
+            }
             len as isize
         },
         _ => {

@@ -1,10 +1,20 @@
 use riscv::register::sstatus::{self, Sstatus, SPP};
 
 #[repr(C)]
+/// trap context structure containing sstatus, sepc and registers
 pub struct TrapContext {
+    /// general regs[0..31]
     pub x: [usize; 32],
+    /// CSR sstatus      
     pub sstatus: Sstatus,
+    /// CSR sepc
     pub sepc: usize,
+    /// Addr of Page Table
+    pub kernel_satp: usize,
+    /// kernel stack
+    pub kernel_sp: usize,
+    /// Addr of trap_handler function
+    pub trap_handler: usize,
 }
 
 impl TrapContext {
@@ -12,15 +22,19 @@ impl TrapContext {
         self.x[2] = sp; // set stack pointer to x_2 reg
     }
 
-    pub fn app_init_context(entry: usize, sp: usize) -> Self {
+    /// init app_context
+    pub fn app_init_context(entry: usize, sp: usize, kernel_satp: usize, kernel_sp: usize, trap_handler: usize) -> Self {
         let mut sstatus = sstatus::read();
         sstatus.set_spp(SPP::User);
         let mut cx = Self {
             x: [0; 32],
             sstatus,
             sepc: entry,
+            kernel_satp,
+            kernel_sp,
+            trap_handler,
         };
-        cx.set_sp(sp); // sp points to the address of user stack
-        cx // return the initial TrapContext of app: stored in a0 reg
+        cx.set_sp(sp);
+        cx
     }
 }

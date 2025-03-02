@@ -58,6 +58,12 @@ pub fn get_num_app() -> usize {
     }
 }
 
+/// get application data
+pub fn get_app_data(app_id: usize) -> &'static [u8] {
+    
+}
+
+
 /// Load nth user app at
 /// [APP_BASE_ADDRESS + n * APP_SIZE_LIMIT, APP_BASE_ADDRESS + (n+1) * APP_SIZE_LIMIT).
 pub fn load_apps() {

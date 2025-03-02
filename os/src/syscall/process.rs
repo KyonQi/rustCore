@@ -1,4 +1,4 @@
-use crate::{println, task::{exit_current_and_run_next, suspend_current_and_run_next}, timer::get_time_ms};
+use crate::{println, task::{change_program_brk, exit_current_and_run_next, suspend_current_and_run_next}, timer::get_time_ms};
 
 pub fn sys_exit(exit_code: i32) -> ! {
     println!("[kernel] Application exited with code {}", exit_code);
@@ -14,4 +14,13 @@ pub fn sys_yield() -> isize {
 /// get time in milliseconds
 pub fn sys_get_time() -> isize {
     get_time_ms() as isize
+}
+
+/// change data segment size
+pub fn sys_sbrk(size: i32) -> isize {
+    if let Some(old_brk) = change_program_brk(size) {
+        old_brk as isize
+    } else {
+        -1
+    }
 }
