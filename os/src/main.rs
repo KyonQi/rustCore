@@ -60,17 +60,14 @@ pub fn rust_main() -> ! {
     
     // sleep(2);
     println!("Hello, World");
-    init_heap();
-    heap_test();
+    // init_heap();
+    // heap_test();
     // panic!("Shutdown right now!");
 
-    trap::init();
-    loader::load_apps();
+    mm::init();
     trap::enable_timer_interrupt();
     timer::set_next_trigger();
     task::run_first_task();
-
-
     panic!("Unreachable in rust_main!");
     // batch::init();
     // batch::run_next_app();

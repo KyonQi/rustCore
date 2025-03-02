@@ -1,6 +1,5 @@
-use std::{fs::{read_dir, File}, io::{Write, Result}};
-
-static TARGET_PATH: &str = "../user/target/riscv64gc-unknown-none-elf/release/";
+use std::fs::{read_dir, File};
+use std::io::{Result, Write};
 
 fn main() {
     println!("cargo:rerun-if-changed=../user/src/");
@@ -8,16 +7,19 @@ fn main() {
     insert_app_data().unwrap();
 }
 
+static TARGET_PATH: &str = "../user/target/riscv64gc-unknown-none-elf/release/";
+
 fn insert_app_data() -> Result<()> {
     let mut f = File::create("src/link_app.S").unwrap();
-    let mut apps: Vec<_> = read_dir("../user/src/bin").unwrap()
+    let mut apps: Vec<_> = read_dir("../user/src/bin")
+        .unwrap()
         .into_iter()
         .map(|dir_entry| {
             let mut name_with_ext = dir_entry.unwrap().file_name().into_string().unwrap();
             name_with_ext.drain(name_with_ext.find('.').unwrap()..name_with_ext.len());
             name_with_ext
-    }).collect();
-
+        })
+        .collect();
     apps.sort();
 
     writeln!(
@@ -44,12 +46,12 @@ _num_app:
     .section .data
     .global app_{0}_start
     .global app_{0}_end
+    .align 3
 app_{0}_start:
-    .incbin "{2}{1}.bin"
+    .incbin "{2}{1}"
 app_{0}_end:"#,
             idx, app, TARGET_PATH
         )?;
     }
-
     Ok(())
 }

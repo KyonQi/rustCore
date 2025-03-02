@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 use switch::__switch;
 use task::{TaskControlBlock, TaskStatus};
 
-use crate::{config::MAX_APP_NUM, loader::{get_app_data, get_num_app, init_app_cx}, println, sbi::shutdown, sync::UPSafeCell, trap::TrapContext};
+use crate::{config::MAX_APP_NUM, loader::{get_app_data, get_num_app}, println, sbi::shutdown, sync::UPSafeCell, trap::TrapContext};
 
 mod switch;
 mod context;

@@ -1,7 +1,7 @@
 #![no_std]
 #![feature(linkage)]
 
-use syscall::{sys_exit, sys_get_time, sys_write, sys_yield};
+use syscall::{sys_exit, sys_get_time, sys_sbrk, sys_write, sys_yield};
 
 mod syscall;
 pub mod console;
@@ -10,7 +10,6 @@ mod lang_items;
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".text.entry")]
 pub extern "C" fn _start() -> ! {
-    clear_bss();
     exit(main());
     panic!("unreachable after sys_exit");
 }
@@ -22,15 +21,15 @@ fn main() -> i32 {
 }
 
 // need to set 0 for .bss section
-fn clear_bss() {
-    unsafe extern "C" {
-        fn start_bss();
-        fn end_bss();
-    }
-    (start_bss as usize..end_bss as usize).for_each(|a| {
-        unsafe { (a as *mut u8).write_volatile(0); }
-    });
-}
+// fn clear_bss() {
+//     unsafe extern "C" {
+//         fn start_bss();
+//         fn end_bss();
+//     }
+//     (start_bss as usize..end_bss as usize).for_each(|a| {
+//         unsafe { (a as *mut u8).write_volatile(0); }
+//     });
+// }
 
 pub fn write(fd: usize, buffer: &[u8]) -> isize {
     sys_write(fd, buffer)
@@ -46,4 +45,8 @@ pub fn yield_() -> isize {
 
 pub fn get_time() -> isize {
     sys_get_time()
+}
+
+pub fn sbrk(size: i32) -> isize {
+    sys_sbrk(size)
 }
