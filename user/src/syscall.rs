@@ -56,6 +56,9 @@ pub fn sys_getpid() -> isize {
     sys_call(SYSCALL_GETPID, [0, 0, 0])
 }
 
+/// 功能：当前进程 fork 出来一个子进程。
+/// 返回值：对于子进程返回 0，对于当前进程则返回子进程的 PID 。
+/// syscall ID：220
 pub fn sys_fork() -> isize {
     sys_call(SYSCALL_FORK, [0, 0, 0])
 }
@@ -64,6 +67,12 @@ pub fn sys_exec(path: &str) -> isize {
     sys_call(SYSCALL_EXEC, [path.as_ptr() as usize, 0, 0])
 }
 
+/// 功能：当前进程等待一个子进程变为僵尸进程，回收其全部资源并收集其返回值。
+/// 参数：pid 表示要等待的子进程的进程 ID，如果为 -1 的话表示等待任意一个子进程；
+/// exit_code 表示保存子进程返回值的地址，如果这个地址为 0 的话表示不必保存。
+/// 返回值：如果要等待的子进程不存在则返回 -1；否则如果要等待的子进程均未结束则返回 -2；
+/// 否则返回结束的子进程的进程 ID。
+/// syscall ID：260
 pub fn sys_waitpid(pid: isize, exit_code: *mut i32) -> isize {
     sys_call(SYSCALL_WAITPID, [pid as usize, exit_code as usize, 0])
 }

@@ -1,9 +1,10 @@
 use core::fmt::{self, Write};
 
-use crate::write;
+use crate::{read, write};
 
 struct Stdout;
 
+const STDIN: usize = 0;
 const STDOUT: usize = 1;
 
 impl Write for Stdout {
@@ -20,8 +21,8 @@ pub fn print(args: fmt::Arguments) {
 #[macro_export]
 macro_rules! print {
     ($fmt: literal $(, $($arg: tt)+)?) => {
-        $crate::console::print(format_args!($fmt, $(, $($arg)+)?));
-    };
+        $crate::console::print(format_args!($fmt $(, $($arg)+)?));
+    }
 }
 
 #[macro_export]
@@ -29,4 +30,10 @@ macro_rules! println {
     ($fmt: literal $(, $($arg: tt)+)?) => {
         $crate::console::print(format_args!(concat!($fmt, "\n") $(, $($arg)+)?));
     };
+}
+
+pub fn getchar() -> u8 {
+    let mut c = [0u8; 1];
+    read(STDIN, &mut c);
+    c[0]
 }
