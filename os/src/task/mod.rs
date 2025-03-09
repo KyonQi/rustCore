@@ -9,6 +9,7 @@ use crate::{config::MAX_APP_NUM, loader::{get_app_data, get_num_app}, println, s
 mod switch;
 mod context;
 mod task;
+mod pid;
 
 
 pub struct TaskManager {
