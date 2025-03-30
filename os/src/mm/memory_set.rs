@@ -212,16 +212,16 @@ impl MemorySet {
             MapPermission::R | MapPermission:: W | MapPermission::U), 
             None
         );
-        // used in sbrk
-        memory_set.push(
-            MapArea::new(
-                user_stack_top.into(),
-                user_stack_top.into(),
-                MapType::Framed,
-                MapPermission::R | MapPermission::W | MapPermission::U,
-            ),
-            None,
-        );
+        // // used in sbrk
+        // memory_set.push(
+        //     MapArea::new(
+        //         user_stack_top.into(),
+        //         user_stack_top.into(),
+        //         MapType::Framed,
+        //         MapPermission::R | MapPermission::W | MapPermission::U,
+        //     ),
+        //     None,
+        // );
         // map TrapContext
         memory_set.push(
             MapArea::new(
@@ -239,6 +239,24 @@ impl MemorySet {
         )
     }
 
+    pub fn from_existed_user(user_space: &Self) -> Self {
+        let mut memory_set = Self::new_bare();
+        // map trampoline
+        memory_set.map_trampoline();
+        // copy data sections/trap_context/user_stack
+        for area in user_space.areas.iter() {
+            let new_area = MapArea::from_another(area);
+            memory_set.push(new_area, None);
+            // copy data from another space
+            for vpn in area.vpn_range {
+                let src_ppn = user_space.translate(vpn).unwrap().ppn();
+                let dst_ppn = memory_set.translate(vpn).unwrap().ppn();
+                dst_ppn.get_bytes_array().copy_from_slice(src_ppn.get_bytes_array());
+            }
+        }
+        memory_set
+    }
+
     pub fn activate(&self) {
         let satp = self.page_table.token();
         unsafe {
@@ -252,31 +270,36 @@ impl MemorySet {
         self.page_table.translate(vpn)
     }
 
-    pub fn shrink_to(&mut self, start: VirtAddr, new_end: VirtAddr) -> bool {
-        if let Some(area) = self
-            .areas
-            .iter_mut()
-            .find(|area| area.vpn_range.get_start() == start.floor())
-        {
-            area.shrink_to(&mut self.page_table, new_end.ceil());
-            true
-        } else {
-            false
-        }
+    /// remove all `MapArea`
+    pub fn recycle_data_pages(&mut self) {
+        self.areas.clear();
     }
 
-    pub fn append_to(&mut self, start: VirtAddr, new_end: VirtAddr) -> bool {
-        if let Some(area) = self
-            .areas
-            .iter_mut()
-            .find(|area| area.vpn_range.get_start() == start.floor())
-        {
-            area.append_to(&mut self.page_table, new_end.ceil());
-            true
-        } else {
-            false
-        }
-    }
+    // pub fn shrink_to(&mut self, start: VirtAddr, new_end: VirtAddr) -> bool {
+    //     if let Some(area) = self
+    //         .areas
+    //         .iter_mut()
+    //         .find(|area| area.vpn_range.get_start() == start.floor())
+    //     {
+    //         area.shrink_to(&mut self.page_table, new_end.ceil());
+    //         true
+    //     } else {
+    //         false
+    //     }
+    // }
+
+    // pub fn append_to(&mut self, start: VirtAddr, new_end: VirtAddr) -> bool {
+    //     if let Some(area) = self
+    //         .areas
+    //         .iter_mut()
+    //         .find(|area| area.vpn_range.get_start() == start.floor())
+    //     {
+    //         area.append_to(&mut self.page_table, new_end.ceil());
+    //         true
+    //     } else {
+    //         false
+    //     }
+    // }
 
 }
 
@@ -302,6 +325,15 @@ impl MapArea {
             data_frames: BTreeMap::new(), 
             map_type, 
             map_perm, 
+        }
+    }
+
+    pub fn from_another(another: &Self) -> Self {
+        Self {
+            vpn_range: VPNRange::new(another.vpn_range.get_start(), another.vpn_range.get_end()),
+            data_frames: BTreeMap::new(),
+            map_type: another.map_type,
+            map_perm: another.map_perm,
         }
     }
 
@@ -342,19 +374,19 @@ impl MapArea {
         }
     }
 
-    pub fn shrink_to(&mut self, page_table: &mut PageTable, new_end: VirtPageNum) {
-        for vpn in VPNRange::new(new_end, self.vpn_range.get_end()) {
-            self.unmap_one(page_table, vpn);
-        }
-        self.vpn_range = VPNRange::new(self.vpn_range.get_start(), new_end);
-    }
+    // pub fn shrink_to(&mut self, page_table: &mut PageTable, new_end: VirtPageNum) {
+    //     for vpn in VPNRange::new(new_end, self.vpn_range.get_end()) {
+    //         self.unmap_one(page_table, vpn);
+    //     }
+    //     self.vpn_range = VPNRange::new(self.vpn_range.get_start(), new_end);
+    // }
 
-    pub fn append_to(&mut self, page_table: &mut PageTable, new_end: VirtPageNum) {
-        for vpn in VPNRange::new(self.vpn_range.get_end(), new_end) {
-            self.map_one(page_table, vpn);
-        }
-        self.vpn_range = VPNRange::new(self.vpn_range.get_start(), new_end);
-    }
+    // pub fn append_to(&mut self, page_table: &mut PageTable, new_end: VirtPageNum) {
+    //     for vpn in VPNRange::new(self.vpn_range.get_end(), new_end) {
+    //         self.map_one(page_table, vpn);
+    //     }
+    //     self.vpn_range = VPNRange::new(self.vpn_range.get_start(), new_end);
+    // }
 
     /// data: start-aligned but maybe with shorter length
     /// assume that all frames were cleared before
@@ -387,6 +419,7 @@ pub enum MapType {
 
 bitflags! {
     /// it's a sub-set of PTEFlags, only contains R,W,X,U
+    #[derive(Clone, Copy)]
     pub struct MapPermission: u8 {
         const R = 1 << 1;
         const W = 1 << 2;
