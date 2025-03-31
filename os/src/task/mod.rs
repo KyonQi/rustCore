@@ -11,7 +11,7 @@ mod context;
 mod task;
 mod pid;
 mod manager;
-
+mod processor;
 
 pub struct TaskManager {
     /// total number of tasks
