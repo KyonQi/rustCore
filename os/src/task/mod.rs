@@ -10,6 +10,7 @@ mod switch;
 mod context;
 mod task;
 mod pid;
+mod manager;
 
 
 pub struct TaskManager {
