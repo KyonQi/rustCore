@@ -148,4 +148,8 @@ impl TaskControlBlock {
         // return
         task_control_block
     }
+
+    pub fn getpid(&self) -> usize {
+        self.pid.0
+    }
 }
