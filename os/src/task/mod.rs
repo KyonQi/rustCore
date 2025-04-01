@@ -1,8 +1,11 @@
 use alloc::sync::Arc;
-use context::TaskContext;
+pub use context::TaskContext;
 use lazy_static::lazy_static;
-use manager::add_task;
-use processor::{schedule, take_current_task};
+pub use manager::add_task;
+pub use processor::{
+    current_task, current_trap_cx, current_user_token, run_tasks, schedule, take_current_task,
+    Processor,
+};
 use task::{TaskControlBlock, TaskStatus};
 
 use crate::{loader::get_app_data_by_name, println, sbi::shutdown};

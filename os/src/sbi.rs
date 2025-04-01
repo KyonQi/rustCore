@@ -40,6 +40,12 @@ pub fn console_putchar(c: usize) {
     sbi_call(SBI_CONSOLE_PUTCHAR, 0, c, 0, 0);
 }
 
+/// use sbi call to getchar from console (qemu uart handler)
+pub fn console_getchar() -> usize {
+    #[allow(deprecated)]
+    sbi_rt::legacy::console_getchar()
+}
+
 pub fn sleep(t: usize) {
     let current_time = time::read(); // get the cur time
     let wake_up_time = current_time + t * CLOCK_FREQ;
