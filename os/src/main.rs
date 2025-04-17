@@ -65,9 +65,14 @@ pub fn rust_main() -> ! {
     // panic!("Shutdown right now!");
 
     mm::init();
+    mm::remap_test();
+    task::add_initproc();
+    println!("after initproc!");
+    trap::init();
     trap::enable_timer_interrupt();
     timer::set_next_trigger();
-    task::run_first_task();
+    loader::list_apps();
+    task::run_tasks();
     panic!("Unreachable in rust_main!");
     // batch::init();
     // batch::run_next_app();
