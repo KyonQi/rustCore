@@ -3,6 +3,12 @@
 version = 4
 
 [[package]]
+name = "bitflags"
+version = "2.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c8214115b7bf84099f1309324e63141d4c5d7cc26862f97a0a857dbefe165bd"
+
+[[package]]
 name = "buddy_system_allocator"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -104,6 +110,7 @@ checksum = "a210d160f08b701c8721ba1c726c11662f877ea6b7094007e1ca9a1041945034"
 name = "user_lib"
 version = "0.1.0"
 dependencies = [
+ "bitflags",
  "buddy_system_allocator",
  "riscv",
 ]

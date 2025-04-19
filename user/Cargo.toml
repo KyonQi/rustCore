@@ -6,4 +6,5 @@ edition = "2024"
 [dependencies]
 riscv = "0.12.1"
 buddy_system_allocator = "0.6"
+bitflags = "2.8.0"
 

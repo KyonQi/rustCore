@@ -2,8 +2,9 @@
 #![feature(linkage)]
 #![feature(alloc_error_handler)]
 
+use bitflags::bitflags;
 use buddy_system_allocator::LockedHeap;
-use syscall::{sys_exec, sys_exit, sys_fork, sys_get_time, sys_getpid, sys_read, sys_sbrk, sys_waitpid, sys_write, sys_yield};
+use syscall::{sys_close, sys_exec, sys_exit, sys_fork, sys_get_time, sys_getpid, sys_open, sys_read, sys_waitpid, sys_write, sys_yield};
 
 mod syscall;
 pub mod console;
@@ -46,6 +47,24 @@ fn main() -> i32 {
 //     });
 // }
 
+bitflags! {
+    pub struct OpenFlags: u32 {
+        const RDONLY = 0;
+        const WRONLY = 1 << 0;
+        const RDWR = 1 << 1;
+        const CREATE = 1 << 9;
+        const TRUNC = 1 << 10;
+    }
+}
+
+pub fn open(path: &str, flags: OpenFlags) -> isize {
+    sys_open(path, flags.bits())
+}
+
+pub fn close(fd: usize) -> isize {
+    sys_close(fd)
+}
+
 pub fn read(fd: usize, buffer: &mut [u8]) -> isize {
     sys_read(fd, buffer)
 }
@@ -66,9 +85,9 @@ pub fn get_time() -> isize {
     sys_get_time()
 }
 
-pub fn sbrk(size: i32) -> isize {
-    sys_sbrk(size)
-}
+// pub fn sbrk(size: i32) -> isize {
+//     sys_sbrk(size)
+// }
 
 pub fn getpid() -> isize {
     sys_getpid()
