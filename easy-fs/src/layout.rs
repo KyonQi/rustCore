@@ -23,19 +23,6 @@ const INDIRECT1_BOUND: usize = DIRECT_BOUND + INODE_INDIRECT1_COUNT;
 const INDIRECT2_BOUND: usize = INDIRECT1_BOUND + INODE_INDIRECT2_COUNT;
 
 /// Super block of a filesystem
-/// 
-/// If the file is small, only direct indexing is used.
-/// The `direct` array can point to up to INODE_DIRECT_COUNT data blocks.
-/// When set to 28, up to 14KiB(512 bytes x 28) can be addressed directly.
-///
-/// For larger files, indirect1 (single indirect indexing) is used.
-/// It points to a block in the data region, which holds u32 entries,
-/// each pointing to another data block. This adds up to 64KiB (512 / 4 * 512 / 1024).
-///
-/// If the file exceeds 78KiB (direct + indirect1), indirect2 is needed.
-/// It points to a second-level index block in the data region.
-/// Each entry in this block points to a first-level index block,
-/// allowing access to a much larger portion of the file. This adds up to 8MiB (512 / 4 * 64KiB)
 #[repr(C)]
 pub struct SuperBlock {
     magic: u32,
@@ -91,6 +78,19 @@ type IndirectBlock = [u32; BLOCK_SZ / 4];
 /// a data block
 type DataBlock = [u8; BLOCK_SZ];
 /// a disk inode
+/// 
+/// If the file is small, only direct indexing is used.
+/// The `direct` array can point to up to INODE_DIRECT_COUNT data blocks.
+/// When set to 28, up to 14KiB(512 bytes x 28) can be addressed directly.
+///
+/// For larger files, indirect1 (single indirect indexing) is used.
+/// It points to a block in the data region, which holds u32 entries,
+/// each pointing to another data block. This adds up to 64KiB (512 / 4 * 512 / 1024).
+///
+/// If the file exceeds 78KiB (direct + indirect1), indirect2 is needed.
+/// It points to a second-level index block in the data region.
+/// Each entry in this block points to a first-level index block,
+/// allowing access to a much larger portion of the file. This adds up to 8MiB (512 / 4 * 64KiB)
 #[repr(C)]
 pub struct DiskInode {
     pub size: u32,
@@ -425,5 +425,61 @@ impl DiskInode {
             start = end_current_block;
         }
         write_size
+    }
+}
+
+/// a directory entry
+#[repr(C)]
+pub struct DirEntry {
+    name: [u8; NAME_LENGTH_LIMIT + 1], // 27 + 1 => 28 bytes
+    inode_number: u32,
+}
+/// size of a directory entry
+pub const DIRENT_SZ: usize = 32;
+
+impl DirEntry {
+    /// create an empty directory entry
+    pub fn empty() -> Self {
+        Self {
+            name: [0u8; NAME_LENGTH_LIMIT + 1],
+            inode_number: 0,
+        }
+    }
+
+    /// create a directory entry from name and inode_number
+    pub fn new(name: &str, inode_number: u32) -> Self {
+        let mut bytes = [0u8; NAME_LENGTH_LIMIT + 1];
+        bytes[..name.len()].copy_from_slice(name.as_bytes());
+        Self {
+            name: bytes,
+            inode_number,
+        }
+    }
+
+    /// serialize into bytes
+    /// in order to satisfy the need of read_at / write_at in DiskInode
+    pub fn as_bytes(&self) -> &[u8] {
+        unsafe {
+            core::slice::from_raw_parts(self as *const _ as usize as *const u8, DIRENT_SZ)
+        }
+    }
+
+    /// serialize into mutable bytes
+    /// in order to satisfy the need of read_at / write_at in DiskInode
+    pub fn as_bytes_mut(&mut self) -> &mut [u8] {
+        unsafe {
+            core::slice::from_raw_parts_mut(self as *mut _ as usize as *mut u8, DIRENT_SZ)
+        }
+    }
+
+    /// get name of the entry
+    pub fn name(&self) -> &str {
+        let len = (0usize..).find(|i| self.name[*i] == 0).unwrap();
+        core::str::from_utf8(&self.name[..len]).unwrap()
+    }
+
+    /// get inode number of the entry
+    pub fn inode_number(&self) -> u32 {
+        self.inode_number
     }
 }
